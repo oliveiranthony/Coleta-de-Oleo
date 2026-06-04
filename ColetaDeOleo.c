@@ -26,11 +26,11 @@ void DateTimeCadaster(char *buffer, size_t sizeMax)
 void ClearBuffer()
 {
     int trash;
-    while ((trash = getchar()) != '\n' && trash != EOF)
-        ;
+    while ((trash = getchar()) != '\n' && trash != EOF);
 }
 
-int searchDonor(Cadaster *cad, char search[]) {
+int searchDonor(Cadaster *cad, char search[])
+{
 
     FILE *cadasterFile = fopen("CadastroDoador.txt", "r");
 
@@ -41,7 +41,8 @@ int searchDonor(Cadaster *cad, char search[]) {
 
     char line[200];
 
-    while (fgets(line, sizeof(line), cadasterFile)) {
+    while (fgets(line, sizeof(line), cadasterFile))
+    {
 
         if (strncmp(line, "Nome: ", 6) == 0)
         {
@@ -68,33 +69,64 @@ int searchDonor(Cadaster *cad, char search[]) {
     return 0;
 }
 
-char memory() {
+void totalDonatedByUser(char searchUser[])
+{
     FILE *reportFilePerUser = fopen("RegistroDoacao.txt", "r");
 
-    fseek(reportFilePerUser, 0, SEEK_END);
-    long size = ftell(reportFilePerUser);
-    rewind(reportFilePerUser);
-
-    char *content = (char *)malloc(size + 1);
-    if (content == NULL) {
-        printf("Erro ao alocar memoria.\n");
-        fclose(reportFilePerUser);
-        return 1;
+    if (reportFilePerUser == NULL)
+    {
+        printf("Erro ao abrir arquivo.\n");
+        return;
     }
 
-    fread(content, sizeof(char), size, reportFilePerUser);
-    content[size] = '\0';
+    char line[200];
+    char donorName[100];
 
-    printf("Conteúdo completo do arquivo: %s", content);
-    free(content);
+    float totalLiters = 0.0;
+    float donationValue;
+
+    unsigned int totalBottles = 0;
+    unsigned int bottles;
+
+    while (fgets(line, sizeof(line), reportFilePerUser))
+    {
+        if (strncmp(line, "Doador: ", 8) == 0)
+        {
+            strcpy(donorName, line + 8);
+            donorName[strcspn(donorName, "\n")] = '\0';
+        }
+
+        else if (strncmp(line, "Quantidade de garrafas: ", 24) == 0)
+        {
+            sscanf(line + 24, "%u", &bottles);
+
+            if (strcmp(donorName, searchUser) == 0)
+            {
+                totalBottles += bottles;
+            }
+        }
+
+        else if (strncmp(line, "Total doado neste registro: ", 28) == 0)
+        {
+            sscanf(line + 28, "%f", &donationValue);
+
+            if (strcmp(donorName, searchUser) == 0)
+            {
+                totalLiters += donationValue;
+            }
+        }
+    }
+
     fclose(reportFilePerUser);
+
+    printf("\n===== RELATORIO DO USUARIO =====\n");
+    printf("Doador: %s\n", searchUser);
+    printf("Total de garrafas doadas: %u\n", totalBottles);
+    printf("Total de litros doados: %.2f\n", totalLiters);
 }
 
-void searchUser() {
-    
-}
-
-int main() {
+int main()
+{
     setlocale(LC_ALL, "Portuguese");
 
     FILE *cadasterFile, *registerFile, *reportFilePerUser, *reportFilePerDay, *totalFile;
@@ -137,6 +169,7 @@ int main() {
         printf("Informe seu cpf: ");
         fgets(cad.cpf, 15, stdin);
         cad.cpf[strcspn(cad.cpf, "\n")] = '\0';
+        ClearBuffer();
 
         printf("Telefone de registro: ");
         fgets(cad.phone, 20, stdin);
@@ -198,9 +231,13 @@ int main() {
         switch (option)
         {
         case 1:
-        char searchUser[100];
+            char searchUser[100];
             reportFilePerUser = fopen("RegistroDoacao.txt", "a+");
-            memory();
+
+            printf("Digite o nome do doador: ");
+            fgets(searchUser, sizeof(searchUser), stdin);
+            searchUser[strcspn(searchUser, "\n")] = '\0';
+            totalDonatedByUser(searchUser);
 
             break;
 

@@ -3,3 +3,8 @@ CPF: 5823475
 Telefone: 58238342
 Momento do cadastro: 31/05/2026 17:51:45
 
+Nome: Nathan
+CPF: 123.456.789-02
+Telefone: 1677723483
+Momento do cadastro: 03/06/2026 23:44:47
+
