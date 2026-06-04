@@ -3,7 +3,6 @@
 #include <stdlib.h>
 #include <time.h>
 #include <locale.h>
-
 typedef struct
 {
     char name[100], cpf[15], phone[20];
@@ -89,6 +88,10 @@ char memory() {
     printf("Conteúdo completo do arquivo: %s", content);
     free(content);
     fclose(reportFilePerUser);
+}
+
+void searchUser() {
+    
 }
 
 int main() {
@@ -195,6 +198,7 @@ int main() {
         switch (option)
         {
         case 1:
+        char searchUser[100];
             reportFilePerUser = fopen("RegistroDoacao.txt", "a+");
             memory();
 
