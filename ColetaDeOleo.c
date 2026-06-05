@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <locale.h>
+
 typedef struct {
     char name[100], cpf[15], phone[20];
 } Cadaster;
@@ -145,6 +146,42 @@ int TotalDonatedPerDay(char searchDay[], unsigned int *totalBottles, float *tota
     printf("Data: %s\n", searchDay);
     printf("Total de garrafas doadas: %u\n", *totalBottles);
     printf("Total de litros doados: %.2f\n", *totalLiters);
+    return 1;
+}
+
+int TotalCollected(unsigned int *totalBottles, float *totalLiters) {
+    FILE *totalFile = fopen("RegistroDoacao.txt", "r");
+    char line[200];
+    unsigned int tempBottles = 0;
+    *totalBottles = 0;
+    *totalLiters = 0.0;
+
+    if (totalFile == NULL) {
+        printf("Erro ao abrir arquivo.\n");
+        return 0;
+    }
+
+    while (fgets(line, sizeof(line), totalFile)) {
+        if (strncmp(line, "Quantidade de garrafas: ", 24) == 0) {
+            sscanf(line + 24, "%u", &tempBottles);
+            *totalBottles += tempBottles;
+        }
+        else if (strncmp(line, "Total doado neste registro: ", 28) == 0) {
+            float donationValue;
+            sscanf(line + 28, "%f", &donationValue);
+            *totalLiters += donationValue;
+        }
+        tempBottles = 0;
+    }
+
+    fclose(totalFile);
+
+    puts("------------------------------");
+    printf("===== TOTAL ARRECADADO =====\n");
+    printf("Total de garrafas doadas: %u\n", *totalBottles);
+    printf("Total de litros doados: %.2f\n", *totalLiters);
+    printf("------------------------------\n");
+    
     return 1;
 }
 
@@ -306,12 +343,29 @@ int main() {
         break;
 
     case 4:
-        totalFile = fopen("registro.txt", "r+");
-        printf("\nTotal arrecadado:\n");
+        float totalLiters;
+        unsigned int totalBottles;
+        totalFile = fopen("ValorTotalArrecadado.txt", "a+");
+        DateTime(currentDate, sizeof(currentDate));
+        if (!TotalCollected(&totalBottles, &totalLiters)) {
+            puts("Erro ao calcular total arrecadado.");
+            printf("Certifique-se de que ha registros de doacoes para calcular o total arrecadado.\n");
+            break;
+        }
+        fprintf(totalFile, "\n===== Total arrecadado =====\n"
+                           "Total de garrafas doadas: %u\n"
+                           "Total de litros doados: %.2f\n"
+                           "Relatorio gerado em: %s\n",
+                           totalBottles, totalLiters, currentDate);
+
+        fclose(totalFile);
         break;
 
     case 5:
-        printf("\nSaindo do sistema...\n");
+        puts("\n------------------------------");
+        puts("Saindo do sistema...");
+        printf("Obrigado por utilizar o Sistema de Doacao de Oleo!\n");
+        puts("------------------------------");
         return 1;
     }
 
@@ -319,6 +373,7 @@ int main() {
     printf("DESENVOLVIDO POR:\n"
            "Anthony Oliveira Carvalho\n"
            "Nathan Lazaro Sebriano\n");
+    printf("------------------------------\n");
 
     return 0;
 }
