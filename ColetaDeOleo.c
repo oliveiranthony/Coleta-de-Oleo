@@ -58,11 +58,13 @@ int SearchDonor(Cadaster *cad, char search[]){
     return 0;
 }
 
-int TotalDonatedPerUser(Cadaster *cad, char searchUser[]) {
+int TotalDonatedPerUser(Cadaster *cad, char searchUser[], unsigned int *totalBottles, float *totalLiters) {
     FILE *reportFilePerUser = fopen("RegistroDoacao.txt", "r");
     char line[200];
-    float totalLiters = 0.0, donationValue;
-    unsigned int totalBottles = 0, bottles;
+    *totalLiters = 0.0;
+    float donationValue;
+    *totalBottles = 0;
+    unsigned int bottles;
 
     if (reportFilePerUser == NULL) {
         printf("Erro ao abrir arquivo.\n");
@@ -75,14 +77,14 @@ int TotalDonatedPerUser(Cadaster *cad, char searchUser[]) {
                 sscanf(line + 24, "%u", &bottles);
 
                 if (strcmp(searchUser, cad->name) == 0) {
-                    totalBottles += bottles;
+                    *totalBottles += bottles;
                 }
             }
             else if (strncmp(line, "Total doado neste registro: ", 28) == 0) {
                 sscanf(line + 28, "%f", &donationValue);
 
                 if (strcmp(searchUser, cad->name) == 0) {
-                    totalLiters += donationValue;
+                    *totalLiters += donationValue;
                 }
             }
         }
@@ -91,11 +93,58 @@ int TotalDonatedPerUser(Cadaster *cad, char searchUser[]) {
     }
 
     fclose(reportFilePerUser);
-
+    
+    puts("------------------------------");
     printf("\n===== RELATORIO DO USUARIO =====\n");
     printf("Doador: %s\n", searchUser);
-    printf("Total de garrafas doadas: %u\n", totalBottles);
-    printf("Total de litros doados: %.2f\n", totalLiters);
+    printf("Total de garrafas doadas: %u\n", *totalBottles);
+    printf("Total de litros doados: %.2f\n", *totalLiters);
+    return 1;
+}
+
+int TotalDonatedPerDay(char searchDay[], unsigned int *totalBottles, float *totalLiters) {
+    FILE *reportFilePerDay = fopen("RegistroDoacao.txt", "r");
+    char line[200];
+    
+    *totalLiters = 0.0;
+    *totalBottles = 0;
+    
+    unsigned int tempBottles = 0;
+    float tempLiters = 0.0;
+
+    if (reportFilePerDay == NULL) {
+        printf("Erro ao abrir arquivo.\n");
+        return 0;
+    }
+
+    while (fgets(line, sizeof(line), reportFilePerDay)) {
+        if (strncmp(line, "Quantidade de garrafas: ", 24) == 0) {
+            sscanf(line + 24, "%u", &tempBottles);
+        }
+        else if (strncmp(line, "Total doado neste registro: ", 28) == 0) {
+            sscanf(line + 28, "%f", &tempLiters);
+        }
+        else if (strncmp(line, "Doacao realizada em: ", 21) == 0) {
+            char date[20];
+            sscanf(line + 21, "%s", date); 
+
+            if (strcmp(searchDay, date) == 0) {
+                *totalBottles += tempBottles;
+                *totalLiters += tempLiters;
+            }
+            
+            tempBottles = 0;
+            tempLiters = 0.0;
+        }
+    }
+
+    fclose(reportFilePerDay);
+
+    printf("------------------------------\n");
+    printf("\n===== RELATORIO DO DIA =====\n");
+    printf("Data: %s\n", searchDay);
+    printf("Total de garrafas doadas: %u\n", *totalBottles);
+    printf("Total de litros doados: %.2f\n", *totalLiters);
     return 1;
 }
 
@@ -200,27 +249,33 @@ int main() {
         switch (option) {
         case 1:
             char searchUser[100];
+            float totalLiters;
+            unsigned int totalBottles;
             reportFilePerUser = fopen("RelatorioPorUsuario.txt", "a+");
             DateTime(currentDate, sizeof(currentDate));
 
             printf("Digite o nome do doador: ");
             fgets(searchUser, sizeof(searchUser), stdin);
             searchUser[strcspn(searchUser, "\n")] = '\0';
-            if (!TotalDonatedPerUser(&cad, searchUser)) {
+            if (!TotalDonatedPerUser(&cad, searchUser, &totalBottles, &totalLiters)) {
                 puts("Erro ao gerar relatorio por usuario.");
                 printf("Certifique-se de que o doador foi cadastrado e que ha registros de doacoes para ele.\n");
                 break;
             }
 
-            fprintf(reportFilePerUser, "Relatório do usuário: %s\n"
+            fprintf(reportFilePerUser, "===== Relatório do usuário =====\n"
+                                        "Doador: %s\n"
+                                        "Total de garrafas doadas: %u\n"
+                                        "Total de litros doados: %.2f\n"
                                         "Gerado em: %s\n",
-                                         searchUser, currentDate);
+                                         searchUser, totalBottles, totalLiters, currentDate);
 
             fclose(reportFilePerUser);
             break;
 
         case 2:
-            reportFilePerDay = fopen("RelatorioPorDia.txt", "r");
+            reportFilePerDay = fopen("RelatorioPorDia.txt", "a+");
+            DateTime(currentDate, sizeof(currentDate));
             if (registerFile == NULL) {
                 printf("Erro ao abrir o arquivo de registro.\n");
                 return 1;
@@ -229,12 +284,23 @@ int main() {
             printf("Digite a data para o relatorio (dd/mm/aaaa): ");
             fgets(searchDay, sizeof(searchDay), stdin); 
             searchDay[strcspn(searchDay, "\n")] = '\0';
+            if (!TotalDonatedPerDay(searchDay, &totalBottles, &totalLiters)) {
+                puts("Erro ao gerar relatorio por dia.");
+                printf("Certifique-se de que ha registros de doacoes para a data informada.\n");
+            }
+
+            fprintf(reportFilePerDay, "\n===== Relatório do dia =====\n"
+                                      "Data: %s\n"
+                                      "Total de garrafas doadas: %u\n"
+                                      "Total de litros doados: %.2f\n"
+                                      "Gerado em: %s\n",
+                                      searchDay, totalBottles, totalLiters, currentDate);
 
             fclose(reportFilePerDay);
             break;
 
         default:
-            printf("Opção inválida.");
+            printf("Opcao invalida.");
             break;
         }
         break;
@@ -248,6 +314,11 @@ int main() {
         printf("\nSaindo do sistema...\n");
         return 1;
     }
+
+    puts("------------------------------");
+    printf("DESENVOLVIDO POR:\n"
+           "Anthony Oliveira Carvalho\n"
+           "Nathan Lazaro Sebriano\n");
 
     return 0;
 }

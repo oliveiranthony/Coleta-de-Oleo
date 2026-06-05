@@ -1,6 +1,6 @@
-Relatorio do usuario: Anthony
-Relatorio gerado em: 04/06/2026 17:54:43
-Relatório do usuário: Sei la
-Gerado em: 04/06/2026 19:01:46
-Relatório do usuário: Anthony
-Gerado em: 04/06/2026 19:04:44
+
+===== Relatório do usuário =====
+Doador: Anthony
+Total de garrafas doadas: 23
+Total de litros doados: 41,00
+Gerado em: 04/06/2026 21:17:47
