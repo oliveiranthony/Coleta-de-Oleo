@@ -1,0 +1,12 @@
+===== Relatório do usuário =====
+Doador: Anthony
+Total de garrafas doadas: 15
+Total de litros doados: 32,50
+Gerado em: 06/06/2026 16:34:27
+------------------------------
+===== Relatório do usuário =====
+Doador: Nathan
+Total de garrafas doadas: 15
+Total de litros doados: 30,00
+Gerado em: 06/06/2026 16:34:58
+------------------------------

@@ -1,0 +1,12 @@
+===== Cadastro do doador =====
+Nome: Anthony
+CPF: 123.456.789-01
+Telefone: 74999704246
+Momento do cadastro: 06/06/2026 15:17:14
+------------------------------
+===== Cadastro do doador =====
+Nome: Nathan
+CPF: 987.654.321-09
+Telefone: 16123456789
+Momento do cadastro: 06/06/2026 15:19:10
+------------------------------

@@ -23,8 +23,7 @@ void DateTime(char *buffer, size_t sizeMax) {
 
 void ClearBuffer() {
     int trash;
-    while ((trash = getchar()) != '\n' && trash != EOF)
-        ;
+    while ((trash = getchar()) != '\n' && trash != EOF);
 }
 
 int SearchDonor(Cadaster *cad, char search[]){
@@ -61,7 +60,7 @@ int SearchDonor(Cadaster *cad, char search[]){
 
 int TotalDonatedPerUser(Cadaster *cad, char searchUser[], unsigned int *totalBottles, float *totalLiters) {
     FILE *reportFilePerUser = fopen("RegistroDoacao.txt", "r");
-    char line[200];
+    char line[200], currentDonor[100];
     *totalLiters = 0.0;
     float donationValue;
     *totalBottles = 0;
@@ -74,17 +73,20 @@ int TotalDonatedPerUser(Cadaster *cad, char searchUser[], unsigned int *totalBot
 
     if (SearchDonor(cad, searchUser))  {
         while (fgets(line, sizeof(line), reportFilePerUser)) {
-            if (strncmp(line, "Quantidade de garrafas: ", 24) == 0) {
+            if (strncmp(line, "Doador: ", 8) == 0) {
+                sscanf(line + 8, "%[^\n]", currentDonor);
+            }
+            else if (strncmp(line, "Quantidade de garrafas: ", 24) == 0) {
                 sscanf(line + 24, "%u", &bottles);
 
-                if (strcmp(searchUser, cad->name) == 0) {
+                if (strcmp(searchUser, currentDonor) == 0) {
                     *totalBottles += bottles;
                 }
             }
             else if (strncmp(line, "Total doado neste registro: ", 28) == 0) {
                 sscanf(line + 28, "%f", &donationValue);
 
-                if (strcmp(searchUser, cad->name) == 0) {
+                if (strcmp(searchUser, currentDonor) == 0) {
                     *totalLiters += donationValue;
                 }
             }
@@ -96,7 +98,7 @@ int TotalDonatedPerUser(Cadaster *cad, char searchUser[], unsigned int *totalBot
     fclose(reportFilePerUser);
     
     puts("------------------------------");
-    printf("\n===== RELATORIO DO USUARIO =====\n");
+    printf("===== RELATORIO DO USUARIO =====\n");
     printf("Doador: %s\n", searchUser);
     printf("Total de garrafas doadas: %u\n", *totalBottles);
     printf("Total de litros doados: %.2f\n", *totalLiters);
@@ -141,8 +143,8 @@ int TotalDonatedPerDay(char searchDay[], unsigned int *totalBottles, float *tota
 
     fclose(reportFilePerDay);
 
-    printf("------------------------------\n");
-    printf("\n===== RELATORIO DO DIA =====\n");
+    puts("------------------------------");
+    printf("===== RELATORIO DO DIA =====\n");
     printf("Data: %s\n", searchDay);
     printf("Total de garrafas doadas: %u\n", *totalBottles);
     printf("Total de litros doados: %.2f\n", *totalLiters);
@@ -231,13 +233,16 @@ int main() {
         fgets(cad.phone, 20, stdin);
         cad.phone[strcspn(cad.phone, "\n")] = '\0';
 
-        fprintf(cadasterFile, "Nome: %s\n"
+        fprintf(cadasterFile, "===== Cadastro do doador =====\n"
+                              "Nome: %s\n"
                               "CPF: %s\n"
                               "Telefone: %s\n",
                 cad.name, cad.cpf, cad.phone);
         char currentDate[20];
         DateTime(currentDate, sizeof(currentDate));
-        fprintf(cadasterFile, "Momento do cadastro: %s\n\n", currentDate);
+        fprintf(cadasterFile, "Momento do cadastro: %s\n"
+                              "------------------------------\n"
+                                , currentDate);
         fclose(cadasterFile);
         printf("Cadastro realizado com sucesso!\n");
         break;
@@ -265,11 +270,13 @@ int main() {
         totalPerRegister = reg.liters * reg.quantity;
         printf("Total doado neste registro: %.2f litros\n", totalPerRegister);
         DateTime(currentDate, sizeof(currentDate));
-        fprintf(registerFile, "Doador: %s\n"
+        fprintf(registerFile, "===== Registro de doação =====\n"
+                              "Doador: %s\n"
                               "Quantidade de garrafas: %u\n"
                               "Capacidade da(s) garrafa(s) doada(s): %.2f litros\n"
                               "Total doado neste registro: %.2f litros\n"
-                              "Doacao realizada em: %s\n\n",
+                              "Doacao realizada em: %s\n"
+                              "------------------------------\n",
                             cad.name, reg.quantity, reg.liters, totalPerRegister, currentDate);
 
         fclose(registerFile);
@@ -304,7 +311,8 @@ int main() {
                                         "Doador: %s\n"
                                         "Total de garrafas doadas: %u\n"
                                         "Total de litros doados: %.2f\n"
-                                        "Gerado em: %s\n",
+                                        "Gerado em: %s\n"
+                                        "------------------------------\n",
                                          searchUser, totalBottles, totalLiters, currentDate);
 
             fclose(reportFilePerUser);
@@ -326,11 +334,12 @@ int main() {
                 printf("Certifique-se de que ha registros de doacoes para a data informada.\n");
             }
 
-            fprintf(reportFilePerDay, "\n===== Relatório do dia =====\n"
+            fprintf(reportFilePerDay, "===== Relatório do dia =====\n"
                                       "Data: %s\n"
                                       "Total de garrafas doadas: %u\n"
                                       "Total de litros doados: %.2f\n"
-                                      "Gerado em: %s\n",
+                                      "Gerado em: %s\n"
+                                      "------------------------------\n",
                                       searchDay, totalBottles, totalLiters, currentDate);
 
             fclose(reportFilePerDay);

@@ -1,0 +1,21 @@
+===== Registro de doação =====
+Doador: Anthony
+Quantidade de garrafas: 10
+Capacidade da(s) garrafa(s) doada(s): 2,50 litros
+Total doado neste registro: 25,00 litros
+Doacao realizada em: 06/06/2026 15:30:06
+------------------------------
+===== Registro de doação =====
+Doador: Nathan
+Quantidade de garrafas: 15
+Capacidade da(s) garrafa(s) doada(s): 2,00 litros
+Total doado neste registro: 30,00 litros
+Doacao realizada em: 06/06/2026 15:30:48
+------------------------------
+===== Registro de doação =====
+Doador: Anthony
+Quantidade de garrafas: 5
+Capacidade da(s) garrafa(s) doada(s): 1,50 litros
+Total doado neste registro: 7,50 litros
+Doacao realizada em: 06/06/2026 15:33:05
+------------------------------
